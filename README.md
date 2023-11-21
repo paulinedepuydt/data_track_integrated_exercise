@@ -76,7 +76,7 @@ Think about the lessons you have learned about ingesting data for data pipelines
 1. Start by experimenting with the API and getting the air quality data locally. This ensures a fast feedback cycle. Write the raw data as json to 1 or more files.
 2. If you are confident in your solution, you may test the integration with AWS. For this you would need to make the following changes:
  - configure your aws credentials to a specific profile such that you can connect to the correct aws_account and use the correct credentials. You can then use AWS_PROFILE=... before executing your python code
- - write the files to your own path on the s3 bucket called: **integrated-exercise-resources**. Prefix the path of the s3 bucket with your first name like: niels-data/...
+ - write the files to your own path on the s3 bucket called: **data-track-integrated-exercise**. Prefix the path of the s3 bucket with your first name like: niels-data/...
 3. create an aws batch job definition that allows you to run your code in AWS batch. Use the AWS role with name: **integrated-exercise-batch-job-role**.
  - Try wether you can get this working using Terraform: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_job_definition
  - You will need to create an ecr repository for the docker image that will be used in AWS batch. Before you can push to the ecr registry, you must be logged in:
@@ -85,7 +85,7 @@ Think about the lessons you have learned about ingesting data for data pipelines
  - trigger a job from the AWS batch definition using the AWS console UI
 4. create the Airflow dag for ingesting the data every day at midnight. For this I have setup a shared MWAA in the AWS account.
    You can trigger an AWS batch job using the [AwsBatchOperator](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/_api/airflow/providers/amazon/aws/operators/batch/index.html) of Airflow
-   Make sure you prefix your dag with your firstname. Upload your dag code using the aws cli/UI by placing it in the dags folder of the **integrated-exercise-resources** directory.
+   Make sure you prefix your dag with your firstname. Upload your dag code using the aws cli/UI by placing it in the dags folder of the **data-track-integrated-exercise** directory.
    Use the AWS console and the MWAA UI to trigger your dag and test whether it works
 5. (bis) make sure you handle timezones correctly
 6. (bis) You can also write integration tests with the API and or s3 using localstack
@@ -149,7 +149,7 @@ RUN pip install --no-cache-dir -e .
 4. create the Airflow dag for ingesting the data every day at midnight. For this I have setup a shared MWAA in the AWS account.
    You can trigger an AWS batch job using the [AwsBatchOperator](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/_api/airflow/providers/amazon/aws/operators/batch/index.html) of Airflow
    Make sure you prefix your dag with your firstname.
- - upload your dag code using the cli: `aws s3 cp dags/integrated_exercise.py s3://integrated-exercise-resources/dags/integrated_exercise.py`
+ - upload your dag code using the cli: `aws s3 cp dags/integrated_exercise.py s3://data-track-integrated-exercise/dags/integrated_exercise.py`
  - Use the AWS console and the MWAA UI to trigger your dag and test whether it works
 
 ### Troubleshooting issues
