@@ -2,7 +2,6 @@ import sys
 from time import sleep
 
 import argparse
-import boto3
 import requests
 import logging
 

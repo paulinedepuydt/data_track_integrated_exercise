@@ -10,7 +10,10 @@ In short what you will do is:
 
 We've set up a Gitpod environment containing all the tools required to complete this exercise (awscli, python, vscode, ...). You can access this environment by clicking the button below:
 
-https://gitpod.io/#https://github.com/nclaeys/data_track_integrated_exercise
+[![Open in Gitpod][gitpod logo]][this gitpod]
+
+[this gitpod]: https://gitpod.io/#https://github.com/nclaeys/data_track_integrated_exercise
+[gitpod logo]: https://gitpod.io/button/open-in-gitpod.svg
 
 NOTE: When you fork this repo to your own remote make sure to change the Gitpod URL to reflect your account in this README!
 

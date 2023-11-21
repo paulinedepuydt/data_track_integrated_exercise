@@ -8,6 +8,17 @@ tasks:
     command: |
       echo "source $(pwd)/venv/bin/activate" >> ~/.bashrc
       source venv/bin/activate
+  - name: Gitpod config (browser open, workspace bin path)
+    init: |
+      mkdir -p /workspace/bin
+      cat > /workspace/bin/open.sh <<'EOF'
+      #!/bin/bash
+      exec gp preview --external "$@"
+      EOF
+      chmod +x /workspace/bin/open.sh
+    command: |
+      sudo update-alternatives --install /usr/bin/www-browser www-browser /workspace/bin/open.sh 100
+      exit
 image:
   file: .gitpod.Dockerfile
 github:
