@@ -37,17 +37,16 @@ timeseries_gent = pd.DataFrame(station_gent.loc["timeseries", "properties"]).tra
 
 
 # get timeseries metadata for those timeseries available in station of interest
-def get_timeseries_meta(ts_id):
+def getandwrite_timeseries_meta(ts_id):
     response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{ts_id}")
     response = response_status.json()
     fn = f"local_data/{ts_id}.json"
-    with open('result.json', 'w') as fp:
-        json.dump(sample, fp)
-    response.dump(fn, response)
+    with open(fn, 'w') as fp:
+        json.dump(response, fp)
     timeseries_meta = pd.json_normalize(response)  # is 1 rij dus hiervan kan ik alle timeseries onder elkaar plakken uiteindelijk
     return timeseries_meta.columns
 
-pd.DataFrame(list(map(get_timeseries_meta, timeseries_gent.timeseries_id)))  # sommige hebben statusIntervals => zou kunnen wegdoen maar dan kuis je al op...
+pd.DataFrame(list(map(getandwrite_timeseries_meta, timeseries_gent.timeseries_id)))  # sommige hebben statusIntervals => zou kunnen wegdoen maar dan kuis je al op...
 
 
 "https://geo.irceline.be/sos/api/v1/timeseries/7087"
