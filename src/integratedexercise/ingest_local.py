@@ -6,6 +6,7 @@ import requests  # for calling api
 import logging
 import pandas as pd
 import json
+import os.path
 pd.set_option('display.max_colwidth', 100)
 pd.set_option('display.width', 180)
 pd.set_option('display.max_columns', 20)
@@ -40,7 +41,11 @@ timeseries_gent = pd.DataFrame(station_gent.loc["timeseries", "properties"]).tra
 def getandwrite_timeseries_meta(ts_id):
     response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{ts_id}")
     response = response_status.json()
-    fn = f"local_data/{ts_id}.json"
+    try:
+        os.mkdir("local_data/metadata")
+    except Exception:
+        pass
+    fn = f"local_data/metadata/{ts_id}.json"
     with open(fn, 'w') as fp:
         json.dump(response, fp)
     timeseries_meta = pd.json_normalize(response)  # is 1 rij dus hiervan kan ik alle timeseries onder elkaar plakken uiteindelijk
@@ -51,7 +56,9 @@ pd.DataFrame(list(map(getandwrite_timeseries_meta, timeseries_gent.timeseries_id
 
 "https://geo.irceline.be/sos/api/v1/timeseries/7087"
 # get timeseries datapoints
-timespan = "?timespan=PT24H/2023-11-27"
+date = "2023-08-01"
+datefn = date.replace("-", "")
+timespan = f"?timespan=PT24H/{date}"
 #timespan = ""
 response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{timeseries_gent.timeseries_id[0]}/getData{timespan}")
 response = response_status.json()
@@ -60,3 +67,11 @@ df = pd.DataFrame(df['values'].values.tolist())
 len(df)
 df
 
+try:
+    os.mkdir("local_data/timeseries_data")
+    os.mkdir("local_data/timeseries_data/20230801")
+    os.mkdir("local_data/timeseries_data/20230801/Gent")
+except Exception:
+    pass
+
+df.to_csv(f"local_data/timeseries_data/{datefn}/{timeseries_gent.timeseries_id[0]}_data.txt", sep="\t", index=False)
