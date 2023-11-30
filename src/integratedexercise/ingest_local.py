@@ -48,13 +48,12 @@ def getandwrite_timeseries_meta(ts_id):
     fn = f"local_data/metadata/{ts_id}.json"
     with open(fn, 'w') as fp:
         json.dump(response, fp)
-    timeseries_meta = pd.json_normalize(response)  # is 1 rij dus hiervan kan ik alle timeseries onder elkaar plakken uiteindelijk
-    return timeseries_meta.columns
-
-pd.DataFrame(list(map(getandwrite_timeseries_meta, timeseries_gent.timeseries_id)))  # sommige hebben statusIntervals => zou kunnen wegdoen maar dan kuis je al op...
+    # timeseries_meta = pd.json_normalize(response)  # 1 rij voor 1 timeseries, maar sommige timeseries hebben 26 kolommen sommige 27
 
 
-"https://geo.irceline.be/sos/api/v1/timeseries/7087"
+
+" https://geo.irceline.be/sos/api/v1/timeseries/7087"
+# https://geo.irceline.be/sos/api/v1/timeseries/7087/getData?timespan=PT24H/2023-11-27
 # get timeseries datapoints
 date = "2023-08-01"
 datefn = date.replace("-", "")
