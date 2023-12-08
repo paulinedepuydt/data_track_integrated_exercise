@@ -38,11 +38,11 @@ timeseries_gent = pd.DataFrame(station_gent.loc["timeseries", "properties"]).tra
 
 
 # get timeseries metadata for those timeseries available in station of interest
-def getandwrite_timeseries_meta(ts_id):
+def get_timeseries_meta(ts_id):
     response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{ts_id}")
     response = response_status.json()
     try:
-        os.mkdir("local_data/metadata")
+        os.makedirs("local_data/metadata")
     except Exception:
         pass
     fn = f"local_data/metadata/{ts_id}.json"
@@ -51,26 +51,31 @@ def getandwrite_timeseries_meta(ts_id):
     # timeseries_meta = pd.json_normalize(response)  # 1 rij voor 1 timeseries, maar sommige timeseries hebben 26 kolommen sommige 27
 
 
+for ts_id in timeseries_gent.timeseries_id:
+    get_timeseries_meta(ts_id)
 
-" https://geo.irceline.be/sos/api/v1/timeseries/7087"
+
+# "https://geo.irceline.be/sos/api/v1/timeseries/7087"
 # https://geo.irceline.be/sos/api/v1/timeseries/7087/getData?timespan=PT24H/2023-11-27
 # get timeseries datapoints
-date = "2023-08-01"
-datefn = date.replace("-", "")
-timespan = f"?timespan=PT24H/{date}"
-#timespan = ""
-response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{timeseries_gent.timeseries_id[0]}/getData{timespan}")
-response = response_status.json()
-df = pd.DataFrame(response)
-df = pd.DataFrame(df['values'].values.tolist())
-len(df)
-df
 
-try:
-    os.mkdir("local_data/timeseries_data")
-    os.mkdir("local_data/timeseries_data/20230801")
-    os.mkdir("local_data/timeseries_data/20230801/Gent")
-except Exception:
-    pass
+def get_timeseries_datapoints(ts_id, date="2023-08-01"):
+    date = date
+    datefn = date.replace("-", "")
+    timespan = f"?timespan=PT24H/{date}"
+    #timespan = ""
+    response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{ts_id}/getData{timespan}")
+    response = response_status.json()
+    df = pd.DataFrame(response)
+    df = pd.DataFrame(df['values'].values.tolist())
+    try:
+        os.makedirs(f"local_data/timeseries_data/{datefn}/Gent")
+    except Exception:
+        pass
+    df.to_csv(f"local_data/timeseries_data/{datefn}/Gent/{ts_id}_data.txt", sep="\t", index=False)
 
-df.to_csv(f"local_data/timeseries_data/{datefn}/{timeseries_gent.timeseries_id[0]}_data.txt", sep="\t", index=False)
+dates = ["2023-08-01", "2023-08-02", "2023-08-03", "2023-08-04"]
+
+for date in dates:
+    for ts_id in timeseries_gent.timeseries_id:
+        get_timeseries_datapoints(ts_id, date)
