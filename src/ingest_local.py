@@ -24,20 +24,13 @@ def data_from_api(url, norm):
     else: df = pd.DataFrame(response)
     return df
 
+def get_tsinfo_per_station(station_id):
+    response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/stations/{str(station_id)}?expanded=true")
+    response = response_status.json()
+    df = pd.DataFrame(response)
+    df = pd.DataFrame(df.loc["timeseries", "properties"]).transpose().reset_index(names="timeseries_id")
+    return df
 
-stations = data_from_api(api_stations, norm=True)
-stations_of_interest = stations[stations["properties.label"].str.contains("Gent|Antwerpen")]
-station_ids_of_interest = stations_of_interest["properties.id"]
-
-data_from_api(api_stations_exp, norm=False)
-
-# TODO: met timespan parameter telkens de data opvragen van deze dag en wegschrijven, oorspronkelijk was wel de bedoeling om json weg te schrijven
-# get timeseries ids for parameters of interest from station gent
-station_gent = data_from_api(api_stations_gent, norm=False)
-timeseries_gent = pd.DataFrame(station_gent.loc["timeseries", "properties"]).transpose().reset_index(names="timeseries_id")
-
-
-# get timeseries metadata for those timeseries available in station of interest
 def get_timeseries_meta(ts_id):
     response_status = requests.get(f"https://geo.irceline.be/sos/api/v1/timeseries/{ts_id}")
     response = response_status.json()
@@ -50,16 +43,7 @@ def get_timeseries_meta(ts_id):
         json.dump(response, fp)
     # timeseries_meta = pd.json_normalize(response)  # 1 rij voor 1 timeseries, maar sommige timeseries hebben 26 kolommen sommige 27
 
-
-for ts_id in timeseries_gent.timeseries_id:
-    get_timeseries_meta(ts_id)
-
-
-# "https://geo.irceline.be/sos/api/v1/timeseries/7087"
-# https://geo.irceline.be/sos/api/v1/timeseries/7087/getData?timespan=PT24H/2023-11-27
-# get timeseries datapoints
-
-def get_timeseries_datapoints(ts_id, date="2023-08-01"):
+def get_timeseries_datapoints(ts_id, station_id, date="2023-08-01"):
     date = date
     datefn = date.replace("-", "")
     timespan = f"?timespan=PT24H/{date}"
@@ -69,13 +53,28 @@ def get_timeseries_datapoints(ts_id, date="2023-08-01"):
     df = pd.DataFrame(response)
     df = pd.DataFrame(df['values'].values.tolist())
     try:
-        os.makedirs(f"local_data/timeseries_data/{datefn}/Gent")
+        os.makedirs(f"local_data/timeseries_data/{datefn}/{station_id}")
     except Exception:
         pass
-    df.to_csv(f"local_data/timeseries_data/{datefn}/Gent/{ts_id}_data.txt", sep="\t", index=False)
+    df.to_csv(f"local_data/timeseries_data/{datefn}/{station_id}/{ts_id}_data.txt", sep="\t", index=False)
 
-dates = ["2023-08-01", "2023-08-02", "2023-08-03", "2023-08-04"]
+stations_info = data_from_api(api_stations, norm=True)
 
-for date in dates:
-    for ts_id in timeseries_gent.timeseries_id:
-        get_timeseries_datapoints(ts_id, date)
+# get timeseries ids for parameters of interest from station gent
+station_gent = data_from_api(api_stations_gent, norm=False)
+timeseries_gent = pd.DataFrame(station_gent.loc["timeseries", "properties"]).transpose().reset_index(names="timeseries_id")
+
+
+# get timeseries ids for per station
+for station_id in stations_info["properties.id"]:
+    which_ts_per_station = get_tsinfo_per_station(station_id)
+    # get timeseries metadata for those timeseries available in station of interest
+    for ts_id in which_ts_per_station.timeseries_id:
+        get_timeseries_meta(ts_id)
+    # https://geo.irceline.be/sos/api/v1/timeseries/7087
+    # https://geo.irceline.be/sos/api/v1/timeseries/7087/getData?timespan=PT24H/2023-11-27
+    # get timeseries datapoints
+    dates = ["2023-08-01", "2023-08-02", "2023-08-03", "2023-08-04"]
+    for date in dates:
+        for ts_id in which_ts_per_station.timeseries_id:
+            get_timeseries_datapoints(ts_id, station_id, date)

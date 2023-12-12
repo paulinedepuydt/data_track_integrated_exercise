@@ -6,8 +6,7 @@ spark = SparkSession \
     .appName("Python Spark SQL basic example") \
     .config("spark.some.config.option", "some-value") \
     .getOrCreate()
-
-ts = spark.read.load("local_data/timeseries_data/20230801/7087_data.txt", \
+ts = spark.read.load("local_data_backup/timeseries_data/20230801/Gent/7087_data.txt",
     format="csv",
     sep="\t",
     inferSchema="true",
@@ -24,6 +23,6 @@ ts.show()
 ts = ts.withColumn("date", psf.to_date("datetime"))
 ts.groupBy("date").mean("value").show()
 
-ts.coalesce(1).write.format("csv").option("header", "true").mode("append").save("ts.csv")
+ts.coalesce(1).write.format("csv").option("header", "true").mode("append").save("ts_Gent_7087")
 
 
